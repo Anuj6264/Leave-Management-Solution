@@ -105,7 +105,7 @@ def create_leave():
     to_date_str = data.get('to_date')
 
     if not from_date_str or not to_date_str:
-        return jsonify({'message': 'From date and to date are required.'}), 400
+        return jsonify({'message': 'Start date and End date are required.'}), 400
 
     from_date = datetime.strptime(from_date_str, '%Y-%m-%d').date()
     to_date = datetime.strptime(to_date_str, '%Y-%m-%d').date()

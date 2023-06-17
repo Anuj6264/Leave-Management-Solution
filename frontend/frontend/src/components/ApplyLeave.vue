@@ -27,11 +27,10 @@ export default {
       toDate: null,
     };
   },
-  methods: {
+  methods: { 
     applyLeave() {
-      console.log("Entered applyLeave Method")
       if (!this.fromDate || !this.toDate) {
-        alert('Please select both From Date and To Date.');
+        alert('Please select both Start and End Date.');
         return;
       }
 
@@ -45,15 +44,14 @@ export default {
       this.$http
         .post('http://localhost:5000/api/leaves', leaveData, {
         headers: {
-        Authorization: `Bearer ${localStorage.access_token}`}, // Replace `yourAccessToken` with the actual token value
+        Authorization: `Bearer ${localStorage.access_token}`}, 
       })
         .then(response => {
-          alert('Leave applied successfully.');
-          // displayLeaves(response.data);
+          alert('Leaves applied successfully.');
       })
         .catch(error => {
           console.error(error);
-          alert('Failed to apply leave. Please try again.');
+          alert("Leaves can't be processed. Please check if the selected date range is less than 15 days and End date exceeds Start date.");
       });
     },
   }

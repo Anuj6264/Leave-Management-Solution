@@ -48,7 +48,6 @@ export default {
     };
   },
   created() {
-    // Fetch all leaves from backend and assign to this.leaves
     this.fetchLeaves();
   },
   methods: {
@@ -58,7 +57,6 @@ export default {
         .get("http://localhost:5000/api/leaves/all", {
            headers: {
            Authorization: `Bearer ${localStorage.access_token}`},
-         // Replace `yourAccessToken` with the actual token value
         })
         .then((response) => {
           console.log(response.data)
@@ -75,7 +73,6 @@ export default {
         .patch(`http://localhost:5000/api/leaves/${leaveId}`, {status: 'accepted' },{
         headers: {
         Authorization: `Bearer ${localStorage.access_token}`},
-         // Replace `yourAccessToken` with the actual token value
       })
         .then(() => {
           this.fetchLeaves();
@@ -83,7 +80,7 @@ export default {
         })
         .catch((error) => {
           console.error(error);
-          alert("Error")
+          alert("Some error occured. Please try again")
         });
     },
     rejectLeave(leaveId) {
@@ -96,7 +93,7 @@ export default {
         this.$http
           .patch(`http://localhost:5000/api/leaves/${leaveId}`, { reason: leave.reason, status: 'rejected'}, {
         headers: {
-        Authorization: `Bearer ${localStorage.access_token}`}, // Replace `yourAccessToken` with the actual token value
+        Authorization: `Bearer ${localStorage.access_token}`}, 
       })
           .then(() => {
             this.fetchLeaves();
@@ -104,7 +101,7 @@ export default {
           })
           .catch((error) => {
             console.error(error);
-            alert("Error")
+            alert("Some error occured. Please try again")
           });
       }
     },

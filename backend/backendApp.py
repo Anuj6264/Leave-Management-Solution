@@ -1,22 +1,27 @@
-#I have imported necessary dependencies here:
+#imported necessary dependencies here
 from flask import Flask, jsonify, request
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
 from functools import wraps
+from flask_cors import CORS, cross_origin
 import holidays
 
 app = Flask(__name__)
+CORS(app)
 
 # Configuration:
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:6264@localhost:5432/leave_management_system'
 app.config['JWT_SECRET_KEY'] = 'bd65600d-8669-4903-8a14-af88203add65'
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=1)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 jwt = JWTManager(app)
+
+migrate.init_app(app, db)
 
 # Models:
 class User(db.Model):
@@ -25,24 +30,28 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
+    firstName = db.Column(db.String(255), nullable=False)
+    lastName = db.Column(db.String(255), nullable=False)
+    role = db.Column(db.String(255), nullable=False)
 
 class Leave(db.Model):
     __tablename__ = 'leaves'
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    firstName = db.Column(db.String(255), nullable=False)
+    lastName = db.Column(db.String(255), nullable=False)
     from_date = db.Column(db.Date, nullable=False)
     to_date = db.Column(db.Date, nullable=False)
     leave_count = db.Column(db.Integer)
     status = db.Column(db.String(20), default='pending')
-    reason = db.Column(db.String(255))
+    reason = db.Column(db.String(255), nullable=True)
 
-
-# I have Created database tables here:
+# created database tables here:
 with app.app_context():
     db.create_all()
 
-# Different Routes:
+# different Routes:
 
 # For registering a employee/user or manager:
 @app.route('/api/register', methods=['POST'])
@@ -50,15 +59,20 @@ def register():
     data = request.json
     username = data.get('username')
     password = data.get('password')
+    firstName = data.get('firstName')
+    lastName = data.get('lastName')
+    role = data.get('role')
 
-    if not username or not password:
-        return jsonify({'message': 'Username and password are required.'}), 400
+    if not username or not password or not firstName or not lastName or not role:
+         response = jsonify({'message': 'Username and password are required.'}), 400
+         return response
 
-    user = User(username=username, password=password)
+    user = User(username=username, password=password, firstName=firstName, lastName=lastName, role=role)
     db.session.add(user)
     db.session.commit()
 
-    return jsonify({'message': 'User registered successfully.'}), 201
+    response = jsonify({'message': 'User registered successfully.'}), 201
+    return response
 
 # For aunthenticating and login a employee/user or manager:
 @app.route('/api/login', methods=['POST'])
@@ -76,7 +90,7 @@ def login():
         return jsonify({'message': 'Invalid username or password.'}), 401
 
     access_token = create_access_token(identity=user.id)
-    return jsonify({'access_token': access_token}), 200
+    return jsonify({'access_token': access_token, 'user': {'role': user.role}}), 200
 
 # For applying a leave for employee/user or manager with necessary checks of: 
 # 1. weekends 
@@ -109,9 +123,11 @@ def create_leave():
  
     public_holidays = holidays.CountryHoliday('IN', years=from_date.year)
     leave_days = [day for day in weekdays if day not in public_holidays]
-    leave_count = leave_days.count
+    leave_count = len(leave_days)
 
-    leave = Leave(user_id=user_id, from_date=from_date, to_date=to_date, leave_count=leave_count)
+    user = User.query.get(user_id)
+
+    leave = Leave(user_id=user_id, from_date=from_date, to_date=to_date, leave_count=leave_count, firstName=user.firstName, lastName=user.lastName)
     db.session.add(leave)
     db.session.commit()
 
@@ -132,11 +148,59 @@ def get_leaves():
             'to_date': leave.to_date,
             'leave_count': leave.leave_count,
             'status': leave.status,
-            'reason': leave.reason
+            'reason': leave.reason,
+            'firstName': leave.firstName,
+            'lastName': leave.lastName
         }
         leave_list.append(leave_data)
 
     return jsonify(leave_list), 200
 
+@app.route('/api/leaves/all', methods=['GET'])
+@jwt_required()
+def get_all_leaves():
+    user_id = get_jwt_identity()
+    leaves = Leave.query.filter(Leave.user_id != user_id).all()
+    leave_list = []
+
+    for leave in leaves:
+        leave_data = {
+            'id': leave.id,
+            'from_date': leave.from_date,
+            'to_date': leave.to_date,
+            'leave_count': leave.leave_count,
+            'status': leave.status,
+            'reason': leave.reason,
+            'firstName': leave.firstName,
+            'lastName': leave.lastName
+        }
+        leave_list.append(leave_data)
+
+    return jsonify(leave_list), 200
+
+
+# For accepting or rejecting a leave by manager:
+@app.route('/api/leaves/<int:leave_id>', methods=['PATCH'])
+@jwt_required()
+def update_leave(leave_id):
+    user_id = get_jwt_identity()
+    data = request.json
+    status = data.get('status')
+    reason = data.get('reason')
+
+    if not status or status not in ['accepted', 'rejected']:
+        return jsonify({'message': 'Invalid status value. Must be "accepted" or "rejected".'}), 400
+
+    leave = Leave.query.filter_by(id=leave_id).first()
+
+    if not leave:
+        return jsonify({'message': 'Leave not found.'}), 404
+
+    leave.status = status
+    leave.reason = reason
+    db.session.commit()
+
+    return jsonify({'message': 'Leave updated successfully.'}), 200
+
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)

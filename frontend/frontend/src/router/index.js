@@ -50,14 +50,12 @@ Vue.use(VueRouter);
   })
 
   router.beforeEach((to, from, next) => {
-    const userRole = localStorage.user_role; // Replace this with your logic to fetch the user role
-  
-    // Check if the route requires manager access and if the user is not a manager
+    const userRole = localStorage.user_role; 
     if (to.meta.requiresManager && userRole !== 'Manager') {
       alert("Access Denied")
-      next('/'); // Redirect to another route or show an access denied message
+      next('/');
     } else {
-      next(); // Proceed with the navigation
+      next(); 
     }
   });
   

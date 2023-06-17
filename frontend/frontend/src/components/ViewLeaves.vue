@@ -2,7 +2,6 @@
   <div>
     <h2>VIEW LEAVES</h2>
     <div v-if="noLeavesFound">No leaves found</div>
-    <!-- Display user's leaves -->
     <table v-else class="leaves-table">
       <thead>
         <tr>
@@ -39,27 +38,22 @@ export default {
     };
   },
   created() {
-    // Fetch user's leaves from backend and assign to this.leaves
     this.fetchLeaves();
   },
   methods: {
     fetchLeaves() {
-      // Send a request to the backend API to fetch user's leaves
-      // Replace the URL with your actual API endpoint for fetching leaves
       this.$http.get('http://localhost:5000/api/leaves',  
       {
         headers: {
-        Authorization: `Bearer ${localStorage.access_token}`}, // Replace `yourAccessToken` with the actual token value
+        Authorization: `Bearer ${localStorage.access_token}`}, 
       })
         .then(response => {
           this.leaves = response.data;
           if (this.leaves.length === 0) {
-            // Display a message when no leaves are found
             this.noLeavesFound = true;
           } else {
             this.noLeavesFound = false;
-          }
-          
+          } 
         })
         .catch(error => {
           console.error(error);

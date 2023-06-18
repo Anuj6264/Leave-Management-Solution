@@ -54,7 +54,7 @@ export default {
     fetchLeaves() {
       console.log("Entered fetch function")
       this.$http
-        .get("http://localhost:5000/api/leaves/all", {
+        .get("http://127.0.0.1:5000//api/leaves/all", {
            headers: {
            Authorization: `Bearer ${localStorage.access_token}`},
         })
@@ -70,7 +70,7 @@ export default {
     acceptLeave(leaveId) {
       console.log(localStorage.access_token)
       this.$http
-        .patch(`http://localhost:5000/api/leaves/${leaveId}`, {status: 'accepted' },{
+        .patch(`http://127.0.0.1:5000//api/leaves/${leaveId}`, {status: 'accepted' },{
         headers: {
         Authorization: `Bearer ${localStorage.access_token}`},
       })
@@ -91,7 +91,7 @@ export default {
           return;
         }
         this.$http
-          .patch(`http://localhost:5000/api/leaves/${leaveId}`, { reason: leave.reason, status: 'rejected'}, {
+          .patch(`http://127.0.0.1:5000//api/leaves/${leaveId}`, { reason: leave.reason, status: 'rejected'}, {
         headers: {
         Authorization: `Bearer ${localStorage.access_token}`}, 
       })

@@ -1,6 +1,6 @@
 <template>
     <div>
-    <h2>LOGIN</h2>
+    <h2 class = "login-form">LOGIN</h2>
     <form class="login-form">
       <div class="form-group">
         <label for="username">Username:</label>
@@ -28,7 +28,7 @@
     methods: {
       login() {
         console.log("Entered Login Function")
-        this.$http.post('http://localhost:5000/api/login', { username: this.username, password: this.password })
+        this.$http.post('http://127.0.0.1:5000//api/login', { username: this.username, password: this.password })
         .then(response => {
           alert("Logged In successfully")
           const access_token = response.data.access_token;

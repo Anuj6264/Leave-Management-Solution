@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h2>REGISTER</h2>
+    <h2 class="register-form">REGISTER</h2>
     <form class="register-form">
       <div class="form-group">
         <label for="username">Username:</label>
@@ -31,7 +31,7 @@
       </div>
 
       <button @click.prevent="register">Register</button>
-    </form>
+    </form> 
   </div>
   </template>
   
@@ -50,7 +50,7 @@
     },
     methods: {
       register() {
-        this.$http.post('http://localhost:5000/api/register', 
+        this.$http.post('http://127.0.0.1:5000//api/register', 
         { 
           username: this.username,
           password: this.password, 

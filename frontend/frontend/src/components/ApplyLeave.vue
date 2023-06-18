@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class = "apply-leaves">
     <h1>APPLY LEAVES</h1>
     <label for="startDate">Start Date :</label>
     <datepicker v-model="fromDate" format="DD-MM-YYYY"></datepicker>
@@ -42,7 +42,7 @@ export default {
       console.log(leaveData.from_date, leaveData.to_date)
 
       this.$http
-        .post('http://localhost:5000/api/leaves', leaveData, {
+        .post('http://127.0.0.1:5000//api/leaves', leaveData, {
         headers: {
         Authorization: `Bearer ${localStorage.access_token}`}, 
       })
@@ -64,7 +64,7 @@ export default {
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
 }
 
 h1 {
@@ -84,9 +84,8 @@ label {
 button {
   display: block;
   margin-top: 20px;
-  margin-left: 700px;
   padding: 10px 50px;
-  align-self: flex-start;
+  align-items: center;
   background-color: #007bff;
   color: #fff;
   border: none;

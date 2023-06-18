@@ -42,7 +42,7 @@ export default {
   },
   methods: {
     fetchLeaves() {
-      this.$http.get('http://localhost:5000/api/leaves',  
+      this.$http.get('http://127.0.0.1:5000//api/leaves',  
       {
         headers: {
         Authorization: `Bearer ${localStorage.access_token}`}, 

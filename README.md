@@ -41,8 +41,7 @@ Save the file and run the ``backendApp.py`` file. This will connect the backend 
 
 ### Frontend
 ```shell
-cd frontend
-cd frontend
+cd frontend/frontend
 npm init
 npm install
 ```
@@ -57,9 +56,10 @@ python backendApp.py
 ```
 ### Frontend
 ```shell
+npm install yarn
 npm run serve
 ```
-This will start backend and frontend applications at different ports. The frontend port will be possibly ``http://localhost:8080/`` or ``http://localhost:8081/`` and backend port should be ``http://127.0.0.1:5000``. 
+This will start backend and frontend applications at different ports. The frontend port will be ``http://localhost:8080/`` and backend port should be ``http://127.0.0.1:5000``. 
 
 Your app should be running by now, please check the port ``http://localhost:8080/`` to see the application running!
 

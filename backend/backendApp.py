@@ -1,11 +1,10 @@
-#imported necessary dependencies here
+# Import necessary dependencies:
 from flask import Flask, jsonify, request
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
-from functools import wraps
-from flask_cors import CORS, cross_origin
+from flask_cors import CORS
 import holidays
 
 app = Flask(__name__)
@@ -23,6 +22,7 @@ jwt = JWTManager(app)
 
 migrate.init_app(app, db)
 
+
 # Models:
 class User(db.Model):
     __tablename__ = 'users'
@@ -33,6 +33,7 @@ class User(db.Model):
     firstName = db.Column(db.String(255), nullable=False)
     lastName = db.Column(db.String(255), nullable=False)
     role = db.Column(db.String(255), nullable=False)
+
 
 class Leave(db.Model):
     __tablename__ = 'leaves'
@@ -47,9 +48,11 @@ class Leave(db.Model):
     status = db.Column(db.String(20), default='pending')
     reason = db.Column(db.String(255), nullable=True)
 
+
 # created database tables here:
 with app.app_context():
     db.create_all()
+
 
 # different Routes:
 
@@ -64,8 +67,8 @@ def register():
     role = data.get('role')
 
     if not username or not password or not firstName or not lastName or not role:
-         response = jsonify({'message': 'Username and password are required.'}), 400
-         return response
+        response = jsonify({'message': 'Username and password are required.'}), 400
+        return response
 
     user = User(username=username, password=password, firstName=firstName, lastName=lastName, role=role)
     db.session.add(user)
@@ -73,6 +76,7 @@ def register():
 
     response = jsonify({'message': 'User registered successfully.'}), 201
     return response
+
 
 # For aunthenticating and login a employee/user or manager:
 @app.route('/api/login', methods=['POST'])
@@ -92,7 +96,8 @@ def login():
     access_token = create_access_token(identity=user.id)
     return jsonify({'access_token': access_token, 'user': {'role': user.role}}), 200
 
-# For applying a leave for employee/user or manager with necessary checks of: 
+
+# For applying a leave for employee/user or manager with necessary checks of:
 # 1. weekends 
 # 2. public holidays 
 # 3. date range selectable can be 15 days at max
@@ -118,20 +123,23 @@ def create_leave():
     if total_days > 15:
         return jsonify({'message': 'Date range should not exceed 15 days.'}), 400
 
-    weekends = [5, 6] 
-    weekdays = [from_date + timedelta(days=i) for i in range(total_days) if (from_date + timedelta(days=i)).weekday() not in weekends]
- 
+    weekends = [5, 6]
+    weekdays = [from_date + timedelta(days=i) for i in range(total_days) if
+                (from_date + timedelta(days=i)).weekday() not in weekends]
+
     public_holidays = holidays.CountryHoliday('IN', years=from_date.year)
     leave_days = [day for day in weekdays if day not in public_holidays]
     leave_count = len(leave_days)
 
     user = User.query.get(user_id)
 
-    leave = Leave(user_id=user_id, from_date=from_date, to_date=to_date, leave_count=leave_count, firstName=user.firstName, lastName=user.lastName)
+    leave = Leave(user_id=user_id, from_date=from_date, to_date=to_date, leave_count=leave_count,
+                  firstName=user.firstName, lastName=user.lastName)
     db.session.add(leave)
     db.session.commit()
 
     return jsonify({'message': 'Leave created successfully.'}), 201
+
 
 # For fetching the all the leaves corresponding to a employee/user:
 @app.route('/api/leaves', methods=['GET'])
@@ -155,6 +163,7 @@ def get_leaves():
         leave_list.append(leave_data)
 
     return jsonify(leave_list), 200
+
 
 @app.route('/api/leaves/all', methods=['GET'])
 @jwt_required()
@@ -201,6 +210,7 @@ def update_leave(leave_id):
     db.session.commit()
 
     return jsonify({'message': 'Leave updated successfully.'}), 200
+
 
 if __name__ == '__main__':
     app.run(debug=True)
